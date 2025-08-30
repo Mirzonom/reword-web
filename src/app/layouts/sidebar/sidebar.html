@@ -1,0 +1,31 @@
+<aside
+  class="fixed left-0 top-0 z-30 h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform duration-300"
+>
+  <!-- Логотип -->
+  <div class="flex items-center gap-3 h-16 px-5 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+    <lucide-angular [img]="BookOpen" class="text-indigo-600 dark:text-indigo-400" size="24"></lucide-angular>
+    <h1 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+      ReWordWeb
+    </h1>
+  </div>
+
+  <!-- Навигация -->
+  <nav class="p-4">
+    <ul class="space-y-1">
+      @for (item of menuItems; track item.label) {
+        <li>
+          <a
+            [routerLink]="item.link"
+            routerLinkActive="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-medium border-l-10 border-indigo-500"
+            [class]="getItemClass($any($index))"
+            [attr.aria-current]="item.link === currentRoute() ? 'page' : undefined"
+            class="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all duration-150"
+          >
+            <lucide-icon [name]="item.icon" size="18" />
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+</aside>
