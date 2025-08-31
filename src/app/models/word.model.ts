@@ -7,3 +7,8 @@ export interface Word {
   lastReviewed: number;
   createdAt: number;
 }
+
+export interface Mode {
+  id: 'new' | 'review' | 'mixed';
+  label: string;
+}

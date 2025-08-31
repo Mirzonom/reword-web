@@ -1,6 +1,6 @@
 import {Component, signal} from '@angular/core';
 import {RouterLink, RouterLinkActive} from '@angular/router';
-import {BookOpen, LucideAngularModule} from 'lucide-angular';
+import {BookOpen, Library, LucideAngularModule, Settings} from 'lucide-angular';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,9 +17,9 @@ export class Sidebar {
   currentRoute = signal<string>('');
 
   menuItems = [
-    { label: 'Учить', link: '/learn', icon: 'book-open' },
-    { label: 'Словарь', link: '/dictionary', icon: 'library' },
-    { label: 'Настройки', link: '/settings', icon: 'settings' },
+    { label: 'Учить', link: '/learn', icon: BookOpen },
+    { label: 'Словарь', link: '/dictionary', icon: Library },
+    { label: 'Настройки', link: '/settings', icon: Settings },
   ];
 
   constructor() {

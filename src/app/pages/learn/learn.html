@@ -1,4 +1,135 @@
 <div class="p-6 ml-64 min-h-screen bg-gray-50 dark:bg-[#212121] text-gray-800 dark:text-gray-200 transition-colors duration-200">
-  <h1 class="text-2xl font-bold mb-6 text-white-700 dark:text-white-400">📚 Учить слова</h1>
-  <p>Экран обучения. Здесь будет карточка слова, выбор категорий и режимов.</p>
+  <!-- Заголовок -->
+  <h1 class="text-2xl font-bold mb-6 text-white">📚 Учить слова</h1>
+
+  <!-- Выбор категорий -->
+  <section class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6">
+    <h2 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">Выберите категории</h2>
+    <div class="flex flex-wrap gap-2">
+      @for (cat of ds.categories(); track cat.id) {
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            [checked]="selectedCategoryIds().includes(cat.id)"
+            (change)="updateCategorySelection(cat.id, $event)"
+            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700"
+          />
+          <span class="text-sm">{{ cat.icon }} {{ cat.name }}</span>
+        </label>
+      }
+    </div>
+  </section>
+
+  <!-- Режимы -->
+  <section class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6">
+    <h2 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">Режим обучения</h2>
+    <div class="flex flex-wrap gap-2">
+      @for (m of modes; track m.id) {
+        <button
+          (click)="mode.set(m)"
+          [class]="m.id === mode().id
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+          "
+          class="px-4 py-2 rounded-lg text-sm font-medium transition"
+        >
+          {{ m.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Кнопка начать -->
+  @if (!currentWord) {
+    <button (click)="loadNextWord()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow transition mb-6">
+      Начать обучение
+    </button>
+  }
+
+  <!-- Карточка слова -->
+  @if (currentWord) {
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg mb-6 text-center max-w-lg mx-auto transition-all duration-300">
+      <!-- Перевод (виден всегда) -->
+      <h2 class="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-6">
+        {{ currentWord.translation }}
+      </h2>
+
+      <!-- Оригинал (показывается по клику) -->
+      @if (showOriginal) {
+        <p class="text-2xl text-gray-600 dark:text-gray-300 mb-6">
+          {{ currentWord.original }}
+        </p>
+      }
+
+      <!-- Поле ввода -->
+      @if (showInput) {
+        <div class="mb-4">
+          <input
+            type="text"
+            [(ngModel)]="userAnswer"
+            (input)="correctAnswer = false"
+            placeholder="Введите слово..."
+            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <button (click)="checkAnswer()" class="mt-2 px-4 py-1 bg-indigo-600 text-white rounded text-sm">
+            Проверить
+          </button>
+          @if (correctAnswer) {
+            <p class="text-green-600 dark:text-green-400 mt-2 font-medium">✅ Правильно!</p>
+          }
+        </div>
+      }
+
+      <!-- Варианты ответов -->
+      @if (showOptions && currentWord) {
+        <div class="space-y-2 mb-4">
+          @for (option of getAnswerOptions(currentWord.original); track $index) {
+            <button
+              (click)="userAnswer = option; checkAnswer()"
+              [class]="option === currentWord.original
+          ? 'bg-green-600 text-white'
+          : userAnswer === option && !correctAnswer
+            ? 'bg-red-600 text-white'
+            : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+        "
+              class="w-full py-3 rounded-lg text-lg transition text-left px-4"
+            >
+              {{ option }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Кнопки действий -->
+      <div class="flex justify-center gap-4 mt-6">
+        <button (click)="toggleInput()" class="p-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+          <lucide-angular [img]="Keyboard" size="20"></lucide-angular>
+        </button>
+        <button (click)="toggleOriginal()" class="p-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+          <lucide-angular [img]="Eye" size="20"></lucide-angular>
+        </button>
+        <button (click)="toggleOptions()" class="p-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+          <lucide-angular [img]="List" size="20"></lucide-angular>
+        </button>
+      </div>
+    </div>
+
+    <!-- Кнопки "Запомнил" и "Повторить" -->
+    <div class="flex justify-center gap-6 max-w-lg mx-auto mb-6">
+      <button (click)="onRepeat()" class="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl transition shadow">
+        <lucide-angular [img]="ChevronRight" size="18"></lucide-angular>
+        Повторить
+      </button>
+      <button (click)="onRemember()" class="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition shadow">
+        Запомнил
+        <lucide-angular [img]="ChevronLeft" size="18"></lucide-angular>
+      </button>
+    </div>
+  }
+
+  <!-- Статистика (временно) -->
+  <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm">
+    <h3 class="font-medium text-gray-700 dark:text-gray-300">Заучено сегодня: {{ todayLearned }} / {{ ds.user().dailyGoal }}</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400">Стрик: {{ ds.user().currentStreak }} дней</p>
+  </div>
 </div>
